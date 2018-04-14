@@ -8,9 +8,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
-type Quiz struct {
+type quiz struct {
 	Question string
 	Answer   string
 }
@@ -18,21 +19,27 @@ type Quiz struct {
 func main() {
 
 	var filePath string
-	flag.StringVar(&filePath, "file", "./problems.csv", "Q&A file path")
+	var answer string
+	var count int
+	var exam []quiz
 
+	flag.StringVar(&filePath, "file", "./problems.csv", "Q&A file path")
 	flag.Parse()
+
+	// Welcome message
 	fmt.Println("Welcome to your Quiz.....")
 	fmt.Println("Loading questions from: ", filePath)
 
+	// Opens file from the filesystem and logs
+	// an error if something goes wrong
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal("Error opening the file: ", err)
 	}
 
+	// Reads the content of the file and saves it
+	// into a quiz type variable
 	reader := csv.NewReader(bufio.NewReader(file))
-
-	var exam []Quiz
-
 	for {
 		line, err := reader.Read()
 		if err == io.EOF {
@@ -41,12 +48,28 @@ func main() {
 			log.Fatal("Error reading content of file: ", err)
 		}
 
-		exam = append(exam, Quiz{
+		exam = append(exam, quiz{
 			Question: line[0],
 			Answer:   line[1],
 		})
 	}
 
-	fmt.Println(exam)
+	// Prints each question from the quiz and
+	// save the answer into a variable
+	for _, a := range exam {
+		fmt.Printf("%v: ", a.Question)
+		fmt.Scan(&answer)
+
+		answer = strings.TrimSpace(answer)
+		answer = strings.ToLower(answer)
+
+		if answer == a.Answer {
+			count++
+		}
+
+	}
+
+	fmt.Printf("Total questions: %v\n", len(exam))
+	fmt.Printf("Correct questions: %v\n", count)
 
 }
