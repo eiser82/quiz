@@ -19,16 +19,24 @@ type quiz struct {
 func main() {
 
 	var filePath string
+	var testDuration int
 	var answer string
 	var count int
 	var exam []quiz
 
 	flag.StringVar(&filePath, "file", "./problems.csv", "Q&A file path")
+	flag.IntVar(&testDuration, "time", 30, "test duration in seconds")
 	flag.Parse()
 
 	// Welcome message
+	fmt.Println("#######*****###############******#######")
 	fmt.Println("Welcome to your Quiz.....")
-	fmt.Println("Loading questions from: ", filePath)
+	fmt.Printf("Test time set to %v seconds...\n", testDuration)
+	fmt.Printf("Question(s) loaded from: %v...\n", filePath)
+	fmt.Println("#######*****###############******#######")
+	fmt.Println()
+	fmt.Println("Press the [ENTER] key to start the test.")
+	fmt.Println("Waiting for user...")
 
 	// Opens file from the filesystem and logs
 	// an error if something goes wrong
