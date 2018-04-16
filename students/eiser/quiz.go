@@ -9,17 +9,11 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
-type test struct {
+type quiz struct {
 	Question string
 	Answer   string
-}
-
-type quiz struct {
-	test     test
-	duration time.Timer
 }
 
 func printWelcome(testDuration int, filePath string) {
@@ -37,8 +31,8 @@ func printWelcome(testDuration int, filePath string) {
 	fmt.Println()
 }
 
-func createQuiz(filePath string, duration time.Timer) []test {
-	var exam []test
+func createQuiz(filePath string) []quiz {
+	var exam []quiz
 
 	// Opens file from the filesystem
 	file, err := os.Open(filePath)
@@ -57,7 +51,7 @@ func createQuiz(filePath string, duration time.Timer) []test {
 			log.Fatal("Error reading content of file: ", err)
 		}
 
-		exam = append(exam, test{
+		exam = append(exam, quiz{
 			Question: line[0],
 			Answer:   line[1],
 		})
@@ -66,7 +60,7 @@ func createQuiz(filePath string, duration time.Timer) []test {
 	return exam
 }
 
-func startQuiz(quiz []test) int {
+func startQuiz(quiz []quiz) int {
 	var count int
 
 	for _, a := range quiz {
@@ -86,13 +80,14 @@ func main() {
 
 	var filePath string
 	var testDuration int
+	// var result int
 
 	flag.StringVar(&filePath, "file", "./problems.csv", "Q&A file path")
-	flag.IntVar(&testDuration, "duration", 30, "test duration in seconds")
+	flag.IntVar(&testDuration, "duration", 10, "test duration in seconds")
 	flag.Parse()
 
 	printWelcome(testDuration, filePath)
-	test := createQuiz(filePath, time.Timer(30*time.Second))
+	test := createQuiz(filePath)
 	result := startQuiz(test)
 
 	fmt.Printf("Total questions: %v\n", len(test))
