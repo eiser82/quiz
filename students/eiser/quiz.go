@@ -9,11 +9,18 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
+)
+
+var (
+	score        int
+	filePath     string
+	testDuration int
 )
 
 type quiz struct {
-	Question string
-	Answer   string
+	question string
+	answer   string
 }
 
 func printWelcome(testDuration int, filePath string) {
@@ -52,45 +59,49 @@ func createQuiz(filePath string) []quiz {
 		}
 
 		exam = append(exam, quiz{
-			Question: line[0],
-			Answer:   line[1],
+			question: line[0],
+			answer:   line[1],
 		})
 	}
 
 	return exam
 }
 
-func startQuiz(quiz []quiz) int {
-	var count int
+func startQuiz(test []quiz, duration int) {
 
-	for _, a := range quiz {
-		fmt.Printf("%v: ", a.Question)
+	for _, a := range test {
+		fmt.Printf("%v: ", a.question)
 		reader := bufio.NewReader(os.Stdin)
 		answer, _ := reader.ReadString('\n')
 		answer = strings.TrimSpace(answer)
 		answer = strings.ToLower(answer)
-		if answer == a.Answer {
-			count++
+		if answer == a.answer {
+			score++
 		}
 	}
-	return count
 }
 
 func main() {
-
-	var filePath string
-	var testDuration int
-	// var result int
-
 	flag.StringVar(&filePath, "file", "./problems.csv", "Q&A file path")
-	flag.IntVar(&testDuration, "duration", 10, "test duration in seconds")
+	flag.IntVar(&testDuration, "duration", 30, "test duration in seconds")
 	flag.Parse()
 
 	printWelcome(testDuration, filePath)
 	test := createQuiz(filePath)
-	result := startQuiz(test)
 
-	fmt.Printf("Total questions: %v\n", len(test))
-	fmt.Printf("Correct questions: %v\n", result)
+	ticker := time.NewTicker(time.Second * time.Duration(testDuration))
+	completed := make(chan bool)
 
+	go func() {
+		startQuiz(test, testDuration)
+		completed <- true
+	}()
+
+	select {
+	case <-completed:
+	case <-ticker.C:
+		fmt.Println("Test completed, time it's up!")
+		fmt.Printf("Total questions: %v\n", len(test))
+		fmt.Printf("Correct questions: %v\n", score)
+	}
 }
